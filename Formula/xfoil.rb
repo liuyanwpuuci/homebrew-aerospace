@@ -11,12 +11,23 @@ class Xfoil < Formula
 
   fails_with :clang # XFoil is Fortran — needs gfortran from GCC
 
-  patch :DATA # headless mode patch (see __END__ below)
-
   def install
     x11 = Formula["libx11"]
     x11_inc = x11.opt_include.to_s
     x11_lib = x11.opt_lib.to_s
+
+    # --- Patch src/xfoil.f: add XFOIL_HEADLESS support ---
+    # When XFOIL_HEADLESS env var is set, switch from X11 (IDEV=1) to
+    # PostScript-only output (IDEV=4), skipping XOpenDisplay entirely.
+    # This enables headless/scripted operation (required by propeller-mcp).
+    inreplace "src/xfoil.f",
+      "c     IDEV = 5   ! both X11 and Color PostScript file \nC\nC---- Re-plotting flag (for hardcopy)",
+      "c     IDEV = 5   ! both X11 and Color PostScript file \n" \
+      "C---- Headless mode: if XFOIL_HEADLESS env var is set, use PS-only output\n" \
+      "      CALL GETENV('XFOIL_HEADLESS', PREFIX)\n" \
+      "      IF(PREFIX(1:1).NE.' ') IDEV = 4\n" \
+      "C\n" \
+      "C---- Re-plotting flag (for hardcopy)"
 
     # --- Rewrite plotlib/config.make ---
     # Enable double precision, set correct X11 paths, add GCC 10+ compat flag
@@ -97,17 +108,3 @@ class Xfoil < Formula
     assert_match "XFOIL", output
   end
 end
-__END__
-diff --git a/src/xfoil.f b/src/xfoil.f
---- a/src/xfoil.f
-+++ b/src/xfoil.f
-@@ -715,6 +715,9 @@
- c     IDEV = 3   ! both X11 and B&W PostScript file
- c     IDEV = 4   ! Color PostScript output file only
- c     IDEV = 5   ! both X11 and Color PostScript file
-+C---- Headless mode: if XFOIL_HEADLESS env var is set, use PS-only output
-+      CALL GETENV('XFOIL_HEADLESS', PREFIX)
-+      IF(PREFIX(1:1).NE.' ') IDEV = 4
- C
- C---- Re-plotting flag (for hardcopy)
- c     IDEVRP = 2   ! B&W PostScript
