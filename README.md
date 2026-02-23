@@ -37,8 +37,6 @@ For scripted or server use (no GUI needed):
 XFOIL_HEADLESS=1 xfoil < commands.txt
 ```
 
-[propeller-mcp](https://github.com/liuyanwpuuci/propeller-mcp) sets this automatically.
-
 ### Interactive plotting (optional)
 
 XFoil's graphical interface requires XQuartz:
@@ -47,26 +45,6 @@ XFoil's graphical interface requires XQuartz:
 brew install --cask xquartz
 # Log out and back in for X11 to be available
 ```
-
-## Use with propeller-mcp
-
-After `brew install xfoil`, the binary is on your PATH. Configure Claude Code:
-
-```json
-{
-  "mcpServers": {
-    "xfoil": {
-      "command": "python3",
-      "args": ["/path/to/propeller-mcp/server.py"],
-      "env": {
-        "XFOIL_PATH": "xfoil"
-      }
-    }
-  }
-}
-```
-
-Or explicitly: `export XFOIL_PATH=$(brew --prefix xfoil)/bin/xfoil`
 
 ## Roadmap
 

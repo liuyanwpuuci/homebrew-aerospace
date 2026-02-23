@@ -19,7 +19,7 @@ class Xfoil < Formula
     # --- Patch src/xfoil.f: add XFOIL_HEADLESS support ---
     # When XFOIL_HEADLESS env var is set, switch from X11 (IDEV=1) to
     # PostScript-only output (IDEV=4), skipping XOpenDisplay entirely.
-    # This enables headless/scripted operation (required by propeller-mcp).
+    # This enables headless/scripted operation without an X11 display.
     inreplace "src/xfoil.f",
       "c     IDEV = 5   ! both X11 and Color PostScript file \nC\nC---- Re-plotting flag (for hardcopy)",
       "c     IDEV = 5   ! both X11 and Color PostScript file \n" \
@@ -95,10 +95,6 @@ class Xfoil < Formula
 
       Headless/scripted mode (no X server needed):
         XFOIL_HEADLESS=1 xfoil
-      propeller-mcp sets this automatically.
-
-      To use with propeller-mcp:
-        export XFOIL_PATH=#{opt_bin}/xfoil
     EOS
   end
 
