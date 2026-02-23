@@ -1,49 +1,84 @@
 # homebrew-aerospace
 
-Homebrew tap for aerospace engineering tools.
+Homebrew tap for aerospace engineering tools on **macOS** (Apple Silicon M1/M2/M3/M4 & Intel).
 
-## Available Formulas
+## XFoil 6.99
 
-| Formula | Description | Version |
-|---------|-------------|---------|
-| `xfoil` | Subsonic airfoil development system (Mark Drela, MIT) | 6.99 |
+> XFoil is the industry-standard subsonic airfoil analysis tool by Mark Drela (MIT). It does not compile on modern macOS out of the box — this formula fixes that.
 
-## Installation
-
-```bash
-brew tap liuyanwpuuci/aerospace
-brew install xfoil
-```
-
-Or in one command:
+### Install
 
 ```bash
 brew install liuyanwpuuci/aerospace/xfoil
 ```
 
-### XQuartz (optional)
+That's it. Homebrew handles all dependencies (GCC, X11 libraries) and applies the necessary build patches automatically.
 
-XFoil's graphical interface requires an X11 server:
+### What gets patched
+
+XFoil 6.99 requires several fixes for macOS with GCC 10+:
+
+| Patch | Why |
+|-------|-----|
+| `-fallow-argument-mismatch` | GCC 10+ rejects Fortran 77 type mismatches as errors |
+| Remove `-m64` | x86-only flag, ARM64 doesn't recognize it |
+| X11 paths → Homebrew `libx11` | macOS uses `/opt/homebrew/` not `/usr/X11R6/` |
+| Disable `-ffpe-trap` | Benign floating-point exceptions cause crashes on ARM |
+| Double precision | Enables `-fdefault-real-8` for numerical accuracy |
+| **XFOIL_HEADLESS** | Adds env var to skip X11 display — enables scripted/headless use |
+
+No Fortran source code is modified except the 2-line headless patch.
+
+### Headless mode
+
+For scripted or server use (no GUI needed):
+
+```bash
+XFOIL_HEADLESS=1 xfoil < commands.txt
+```
+
+[propeller-mcp](https://github.com/liuyanwpuuci/propeller-mcp) sets this automatically.
+
+### Interactive plotting (optional)
+
+XFoil's graphical interface requires XQuartz:
 
 ```bash
 brew install --cask xquartz
 # Log out and back in for X11 to be available
 ```
 
-For headless/scripted use (e.g., with [propeller-mcp](https://github.com/liuyanwpuuci/propeller-mcp)), no X server is needed.
+## Use with propeller-mcp
 
-## What this tap does
+After `brew install xfoil`, the binary is on your PATH. Configure Claude Code:
 
-XFoil 6.99 does not compile out-of-the-box on modern macOS (Apple Silicon or Intel with GCC 10+). This formula automatically applies the necessary build patches:
+```json
+{
+  "mcpServers": {
+    "xfoil": {
+      "command": "python3",
+      "args": ["/path/to/propeller-mcp/server.py"],
+      "env": {
+        "XFOIL_PATH": "xfoil"
+      }
+    }
+  }
+}
+```
 
-- Adds `-fallow-argument-mismatch` for GCC 10+ compatibility with Fortran 77 code
-- Removes the x86-only `-m64` flag for ARM64 support
-- Updates X11 paths for Homebrew's `libx11`
-- Disables FPE trapping that causes crashes on ARM
+Or explicitly: `export XFOIL_PATH=$(brew --prefix xfoil)/bin/xfoil`
 
-No Fortran source code is modified — only build configuration files are patched.
+## Roadmap
+
+- [x] XFoil 6.99
+- [ ] QPROP — propeller analysis
+- [ ] QMIL — minimum induced loss propeller design
+- [ ] XROTOR — rotor/propeller design and analysis
+- [ ] AVL — vortex-lattice aerodynamic analysis
+
+All tools by Mark Drela share the same GCC 10+ / ARM64 build issues and will use the same patching strategy.
 
 ## License
 
 - This tap (formulas and build scripts): MIT
-- XFoil: GPL-2.0 (source is downloaded from MIT during build, not redistributed)
+- XFoil: GPL-2.0 (source downloaded from MIT during build, not redistributed)
