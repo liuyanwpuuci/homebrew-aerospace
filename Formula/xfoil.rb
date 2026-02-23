@@ -18,6 +18,7 @@ class Xfoil < Formula
 
     # --- Rewrite plotlib/config.make ---
     # Enable double precision, set correct X11 paths, add GCC 10+ compat flag
+    rm buildpath/"plotlib/config.make"
     (buildpath/"plotlib/config.make").write <<~CONFIG
       PLTLIB = libPlt_gDP.a
       DEFINE = -DUNDERSCORE
