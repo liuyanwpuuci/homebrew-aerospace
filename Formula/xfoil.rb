@@ -11,6 +11,8 @@ class Xfoil < Formula
 
   fails_with :clang # XFoil is Fortran — needs gfortran from GCC
 
+  patch :DATA # headless mode patch (see __END__ below)
+
   def install
     x11 = Formula["libx11"]
     x11_inc = x11.opt_include.to_s
@@ -80,7 +82,9 @@ class Xfoil < Formula
         brew install --cask xquartz
       Then log out and back in (or restart) for X11 to be available.
 
-      For headless/scripted use (e.g., with propeller-mcp), no X server is needed.
+      Headless/scripted mode (no X server needed):
+        XFOIL_HEADLESS=1 xfoil
+      propeller-mcp sets this automatically.
 
       To use with propeller-mcp:
         export XFOIL_PATH=#{opt_bin}/xfoil
@@ -88,7 +92,22 @@ class Xfoil < Formula
   end
 
   test do
+    ENV["XFOIL_HEADLESS"] = "1"
     output = pipe_output("#{bin}/xfoil", "QUIT\n", 0)
     assert_match "XFOIL", output
   end
 end
+__END__
+diff --git a/src/xfoil.f b/src/xfoil.f
+--- a/src/xfoil.f
++++ b/src/xfoil.f
+@@ -715,6 +715,9 @@
+ c     IDEV = 3   ! both X11 and B&W PostScript file
+ c     IDEV = 4   ! Color PostScript output file only
+ c     IDEV = 5   ! both X11 and Color PostScript file
++C---- Headless mode: if XFOIL_HEADLESS env var is set, use PS-only output
++      CALL GETENV('XFOIL_HEADLESS', PREFIX)
++      IF(PREFIX(1:1).NE.' ') IDEV = 4
+ C
+ C---- Re-plotting flag (for hardcopy)
+ c     IDEVRP = 2   ! B&W PostScript
