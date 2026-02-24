@@ -46,11 +46,22 @@ brew install --cask xquartz
 # Log out and back in for X11 to be available
 ```
 
+## QPROP 1.22 + QMIL
+
+> QPROP analyzes propeller/windmill performance. QMIL designs minimum induced loss propellers. Both by Mark Drela (MIT).
+
+### Install
+
+```bash
+brew install liuyanwpuuci/aerospace/qprop
+```
+
+Installs both `qprop` and `qmil`. No X11 required — these are pure command-line tools.
+
 ## Roadmap
 
-- [x] XFoil 6.99
-- [ ] QPROP — propeller analysis
-- [ ] QMIL — minimum induced loss propeller design
+- [x] XFoil 6.99 — subsonic airfoil analysis
+- [x] QPROP 1.22 + QMIL — propeller analysis and design
 - [ ] XROTOR — rotor/propeller design and analysis
 - [ ] AVL — vortex-lattice aerodynamic analysis
 
@@ -59,4 +70,4 @@ All tools by Mark Drela share the same GCC 10+ / ARM64 build issues and will use
 ## License
 
 - This tap (formulas and build scripts): MIT
-- XFoil: GPL-2.0 (source downloaded from MIT during build, not redistributed)
+- XFoil, QPROP/QMIL: GPL-2.0 (source downloaded from MIT during build, not redistributed)
