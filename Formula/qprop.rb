@@ -27,7 +27,8 @@ class Qprop < Formula
   end
 
   test do
-    output = shell_output("#{bin}/qprop 2>&1", 1)
+    # QPROP reads stdin; pipe empty input so it runs with defaults and exits
+    output = pipe_output("#{bin}/qprop 2>&1", "\n", 0)
     assert_match "QPROP", output
   end
 end
