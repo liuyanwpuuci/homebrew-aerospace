@@ -58,11 +58,49 @@ brew install liuyanwpuuci/aerospace/qprop
 
 Installs both `qprop` and `qmil`. No X11 required — these are pure command-line tools.
 
+## XROTOR 7.55
+
+> XROTOR is a rotor/propeller design and analysis tool by Mark Drela & Harold Youngren (MIT). Supports multi-airfoil sections (up to 20), noise estimation, twist optimization, and hover/windmill analysis.
+
+### Install
+
+```bash
+brew install liuyanwpuuci/aerospace/xrotor
+```
+
+### What gets patched
+
+XROTOR 7.55 requires the same class of fixes as XFoil, plus a precision-matching fix:
+
+| Patch | Why |
+|-------|-----|
+| `-fallow-argument-mismatch` | GCC 10+ rejects Fortran 77 type mismatches as errors |
+| `-fdefault-real-8` for both plotlib and src | Source and plotlib must use matching double precision, otherwise color spectrum init crashes |
+| X11 paths → Homebrew `libx11` + `xorgproto` | macOS uses `/opt/homebrew/` not `/usr/X11R6/` |
+| **XROTOR_HEADLESS** | Adds env var to skip X11 display — enables scripted/headless use |
+
+### Headless mode
+
+For scripted or server use (no GUI needed):
+
+```bash
+XROTOR_HEADLESS=1 xrotor < commands.txt
+```
+
+### Interactive plotting (optional)
+
+XROTOR's graphical interface requires XQuartz:
+
+```bash
+brew install --cask xquartz
+# Log out and back in for X11 to be available
+```
+
 ## Roadmap
 
 - [x] XFoil 6.99 — subsonic airfoil analysis
 - [x] QPROP 1.22 + QMIL — propeller analysis and design
-- [ ] XROTOR — rotor/propeller design and analysis
+- [x] XROTOR 7.55 — rotor/propeller design and analysis
 - [ ] AVL — vortex-lattice aerodynamic analysis
 
 All tools by Mark Drela share the same GCC 10+ / ARM64 build issues and will use the same patching strategy.
@@ -70,4 +108,4 @@ All tools by Mark Drela share the same GCC 10+ / ARM64 build issues and will use
 ## License
 
 - This tap (formulas and build scripts): MIT
-- XFoil, QPROP/QMIL: GPL-2.0 (source downloaded from MIT during build, not redistributed)
+- XFoil, QPROP/QMIL, XROTOR: GPL-2.0 (source downloaded from MIT during build, not redistributed)
